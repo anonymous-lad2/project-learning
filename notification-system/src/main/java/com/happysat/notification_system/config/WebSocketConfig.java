@@ -60,7 +60,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // This is the endpoint that clients will connect to
         registry.addEndpoint("/ws")
                 // Allow all origins (for development - restrict in production)
-                .setAllowedOrigins("*")
+                .setAllowedOrigins("http://localhost:63342")  // If you serve HTML from Spring Boot
                 // Enable SockJS fallback options
                 .withSockJS();
     }

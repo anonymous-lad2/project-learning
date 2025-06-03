@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time Notifications</title>
+    <!-- Include SockJS and STOMP libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #notifications {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #message {
+            width: 70%;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<h1>Real-Time Notifications</h1>
+<div id="notifications"></div>
+<input type="text" id="message" placeholder="Enter your message">
+<button onclick="sendMessage()">Send</button>
+
+<script>
+    // Global variable to hold the STOMP client connection
+    let stompClient = null;
+
+    /**
+     * Establishes WebSocket connection to the server
+     * - Creates SockJS connection to the WebSocket endpoint
+     * - Wraps it with STOMP protocol
+     * - Subscribes to the notification topic
+     */
+    function connect() {
+        // Create SockJS connection to the WebSocket endpoint
+        const socket = new SockJS('http://localhost:8080/ws');
+
+        // Create STOMP client over the SockJS connection
+        stompClient = Stomp.over(socket);
+
+        // Connect to the server
+        stompClient.connect({},
+            // Success callback
+            function (frame) {
+                console.log('Connected: ' + frame);
+
+                // Subscribe to the notification topic
+                stompClient.subscribe('/topic/notification', function (message) {
+                    showNotification(message.body);
+                });
+            },
+            // Error callback
+            function (error) {
+                console.error('WebSocket connection error: ' + error);
+                // Attempt to reconnect after 5 seconds
+                setTimeout(connect, 5000);
+            }
+        );
+    }
+
+    /**
+     * Sends a message to the server via WebSocket
+     */
+    function sendMessage() {
+        const messageInput = document.getElementById('message');
+        const message = messageInput.value.trim();
+
+        if (message) {
+            if (stompClient && stompClient.connected) {
+                // Send message to the server endpoint
+                stompClient.send('/app/sendMessage', {}, message);
+                console.log('Message sent:', message);
+
+                // Clear the input field
+                messageInput.value = '';
+            } else {
+                console.error('WebSocket connection is not established.');
+                alert('Not connected to server. Trying to reconnect...');
+                connect();
+            }
+        } else {
+            alert('Please enter a message');
+        }
+    }
+
+    /**
+     * Displays a notification in the UI
+     * @param {string} message - The message to display
+     */
+    function showNotification(message) {
+        const notifications = document.getElementById('notifications');
+        const notification = document.createElement('div');
+        notification.className = 'notification-item';
+        notification.textContent = message;
+        notifications.appendChild(notification);
+
+        // Auto-scroll to bottom
+        notifications.scrollTop = notifications.scrollHeight;
+    }
+
+    // Connect when the page loads
+    window.onload = function() {
+        connect();
+
+        // Allow sending message with Enter key
+        document.getElementById('message').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    };
+</script>
+</body>
+</html>
