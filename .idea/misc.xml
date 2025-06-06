@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/part1/pom.xml" />
         <option value="$PROJECT_DIR$/notification-system/pom.xml" />
+        <option value="$PROJECT_DIR$/chatroomapp/pom.xml" />
       </list>
     </option>
   </component>
