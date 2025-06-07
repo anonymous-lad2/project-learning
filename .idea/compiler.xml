@@ -6,15 +6,17 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="chatroomapp" />
+        <module name="books" />
         <module name="notification-system" />
         <module name="advance" />
-        <module name="chatroomapp" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="advance" options="-parameters" />
+      <module name="books" options="-parameters" />
       <module name="chatroomapp" options="-parameters" />
       <module name="notification-system" options="-parameters" />
     </option>
