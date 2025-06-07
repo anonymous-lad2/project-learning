@@ -66,5 +66,39 @@ public class BookController {
                 .orElse(null);
     }
 
+    @PostMapping("/api/books")
+    public void createBook(@RequestBody Book newBook){
+
+//        for(Book book : books){
+//            if(book.getTitle().equalsIgnoreCase(newBook.getTitle())){
+//                return;
+//            }
+//        }
+//
+//        books.add(newBook);
+
+        boolean isNewBook = books
+                .stream()
+                .noneMatch(book -> book.getTitle().equalsIgnoreCase(newBook.getTitle()));
+
+        if(isNewBook){
+            books.add(newBook);
+        }
+    }
+
+    @PutMapping("/api/books/{title}")
+    public void updateBook(@PathVariable String title, @RequestBody Book updatedBook){
+        for(int i = 0; i < books.size(); i++){
+            if(books.get(i).getTitle().equalsIgnoreCase(title)){
+                books.set(i, updatedBook);
+                return;
+            }
+        }
+    }
+
+    @DeleteMapping("/api/books/{title}")
+    public void deleteBook(@PathVariable String title){
+        books.removeIf(book -> book.getTitle().equalsIgnoreCase(title));
+    }
 
 }
