@@ -1,9 +1,16 @@
 package com.happysat.books.controller;
 
+import com.happysat.books.exception.BookErrorResponse;
+import com.happysat.books.exception.BookNotFoundException;
 import com.happysat.books.model.Book;
 import com.happysat.books.request.BookRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/books")
 @Validated
+@Tag(name = "books", description = "Operations related to books")
 public class BookController {
 
     private final List<Book> books = new ArrayList<>();
@@ -48,6 +56,8 @@ public class BookController {
 //    }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "get all books", description = "Retrieve list of all available books")
     public List<Book> getBookByCategory(@Valid @RequestParam(required = false) String category){
 
         if(category == null){
@@ -67,7 +77,10 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public Book getBookById(@PathVariable @Min(1) long id){
+    @ResponseStatus(HttpStatus.OK)
+    @Parameter(description = "title of the book to retrieve")
+    @Operation(summary = "get book by id", description = "Retrieve book using id")
+    public Book getBookById(@PathVariable @Min(1) long id) throws BookNotFoundException {
 
 //        for(Book book : books){
 //            if(book.getTitle().equalsIgnoreCase(title)){
@@ -79,10 +92,12 @@ public class BookController {
         return books.stream()
                 .filter(book -> book.getId() == id)
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new BookNotFoundException("book not found with id - " +id));
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "create new book")
     public void createBook(@Valid @RequestBody BookRequest bookRequest){
 
 //        for(Book book : books){
@@ -107,7 +122,8 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public void updateBook(@PathVariable @Min(1) long id, @Valid @RequestBody BookRequest bookRequest){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateBook(@PathVariable @Min(1) long id, @Valid @RequestBody BookRequest bookRequest) throws BookNotFoundException {
         for(int i = 0; i < books.size(); i++){
             if(books.get(i).getId() == id){
                 Book updatedBook = convertToBook(id, bookRequest);
@@ -115,11 +131,19 @@ public class BookController {
                 return;
             }
         }
+
+        throw new BookNotFoundException("Book not found with id - " +id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable @Min(1) long id){
-        books.removeIf(book -> book.getId() == id);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete a book by ID")
+    public void deleteBook(@PathVariable @Min(1) long id) throws BookNotFoundException {
+        boolean removed = books.removeIf(book -> book.getId() == id);
+
+        if (!removed) {
+            throw new BookNotFoundException("Book not found with id: " + id);
+        }
     }
 
 }
