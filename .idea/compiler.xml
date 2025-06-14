@@ -9,6 +9,7 @@
         <module name="chatroomapp" />
         <module name="books" />
         <module name="notification-system" />
+        <module name="employees" />
         <module name="advance" />
       </profile>
     </annotationProcessing>
@@ -18,6 +19,7 @@
       <module name="advance" options="-parameters" />
       <module name="books" options="-parameters" />
       <module name="chatroomapp" options="-parameters" />
+      <module name="employees" options="-parameters" />
       <module name="notification-system" options="-parameters" />
     </option>
   </component>
